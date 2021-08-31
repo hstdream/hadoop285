@@ -128,7 +128,6 @@ public class AppLogAggregatorImpl implements AppLogAggregator {
   private final AtomicBoolean waiting = new AtomicBoolean(false);
   private int logAggregationTimes = 0;
   private int cleanupOldLogTimes = 0;
-
   //添加上传日志失败的标识信息
   private boolean logAggFailed = false;
   private boolean renameTemporaryLogFileFailed = false;
@@ -333,6 +332,7 @@ public class AppLogAggregatorImpl implements AppLogAggregator {
           writer.writeApplicationOwner(this.userUgi.getShortUserName());
         } catch (IOException e1) {
           logAggregationSucceedInThisCycle = false;
+
           //初始化日志路径失败标识 true
           logAggFailed = true;
           LOG.error("Cannot create writer for app " + this.applicationId
@@ -353,7 +353,7 @@ public class AppLogAggregatorImpl implements AppLogAggregator {
               finishedContainers.contains(container));
 
           //containor 日志信息上传失败了，进行处理了
-          if (uploadedFilePathsInThisCycle.size() > 0  && !logAggFailed) {
+          if (uploadedFilePathsInThisCycle.size() > 0  &&  !logAggFailed) {
             uploadedLogsInThisCycle = true;
             this.delService.delete(this.userUgi.getShortUserName(), null,
                 uploadedFilePathsInThisCycle
@@ -401,6 +401,7 @@ public class AppLogAggregatorImpl implements AppLogAggregator {
                 + LogAggregationUtils.getNodeString(nodeId) + " at "
                 + Times.format(currentTime) + "\n";
       } catch (Exception e) {
+
         //Application rename 上传失败标识
         logAggFailed = true;
         LOG.error(
@@ -554,7 +555,6 @@ public class AppLogAggregatorImpl implements AppLogAggregator {
 
     // App is finished, upload the container logs.
     uploadLogsForContainers(true);
-
     //是否进行本地日志信息删除
     if (!logAggFailed) {
       doAppLogAggregationPostCleanUp();
